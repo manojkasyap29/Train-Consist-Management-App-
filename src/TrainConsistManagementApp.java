@@ -1,40 +1,38 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
-        // --- UC1: Welcome Message ---
+        // --- UC1 & UC2: Consist Initialization ---
         System.out.println("=== Train Consist Management App ===");
-
-        // Initialize the list
         List<String> trainConsist = new ArrayList<>();
 
-        // --- UC2: Add Passenger Bogies (ArrayList Operations) ---
+        // --- UC3: Track Unique Bogie IDs (HashSet) ---
+        System.out.println("\n--- Initializing Bogie ID Tracking (Uniqueness Check) ---");
 
-        // 1. Adding Bogies (Create)
-        trainConsist.add("Sleeper");
-        trainConsist.add("AC Chair");
-        trainConsist.add("First Class");
-        System.out.println("Adding bogies: Sleeper, AC Chair, First Class...");
+        // Using Set interface with HashSet implementation
+        Set<String> bogieIds = new HashSet<>();
 
-        // 2. Display List (Read)
-        System.out.println("Current Consist: " + trainConsist);
-        System.out.println("Total bogies: " + trainConsist.size());
+        // Adding Bogie IDs (including an intentional duplicate)
+        System.out.println("Registering Bogie IDs: B101, B102, B103, B101 (duplicate)...");
+        bogieIds.add("B101");
+        bogieIds.add("B102");
+        bogieIds.add("B103");
 
-        // 3. Remove a Bogie (Delete)
-        System.out.println("\nRemoving bogie: AC Chair...");
-        trainConsist.remove("AC Chair");
+        // Attempting to add a duplicate
+        boolean isAdded = bogieIds.add("B101");
 
-        // 4. Check Existence (Search)
-        System.out.print("Checking if 'Sleeper' exists: ");
-        if (trainConsist.contains("Sleeper")) {
-            System.out.println("Yes, Sleeper is attached.");
-        } else {
-            System.out.println("No, Sleeper is missing.");
+        // 1. Check if the duplicate was accepted
+        if (!isAdded) {
+            System.out.println("Alert: Bogie ID 'B101' is already registered. Duplicate rejected.");
         }
 
-        // 5. Final State
-        System.out.println("\nFinal Consist Summary: " + trainConsist);
-        System.out.println("Final bogie count: " + trainConsist.size());
+        // 2. Display Unique IDs
+        System.out.println("Unique Bogie IDs in System: " + bogieIds);
+        System.out.println("Total Unique Bogies: " + bogieIds.size());
+
+        System.out.println("\nStatus: Data integrity verified. No duplicate bogies detected.");
     }
 }
