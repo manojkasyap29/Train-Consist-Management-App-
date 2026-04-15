@@ -3,7 +3,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Bogie Class: Models a railway unit with attributes (UC7 - UC13)
+ * UC14: Custom Exception for Domain-Specific Errors
+ */
+class InvalidCapacityException extends Exception {
+    public InvalidCapacityException(String message) {
+        super(message);
+    }
+}
+
+/**
+ * Bogie Class: Updated with Fail-Fast Validation (UC14)
  */
 class Bogie {
     private String id;
@@ -11,7 +20,11 @@ class Bogie {
     private String cargo;
     private int capacity;
 
-    Bogie(String id, String type, String cargo, int capacity) {
+    // UC14: Constructor with Capacity Validation
+    Bogie(String id, String type, String cargo, int capacity) throws InvalidCapacityException {
+        if (capacity <= 0) {
+            throw new InvalidCapacityException("Capacity must be greater than zero. Provided: " + capacity);
+        }
         this.id = id;
         this.type = type;
         this.cargo = cargo;
@@ -24,67 +37,58 @@ class Bogie {
 
     @Override
     public String toString() {
-        return type + " [" + capacity + "]";
+        return String.format("[%s | %s | %d]", id, type, capacity);
     }
 }
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
-        // --- UC1 - UC11 Recap (Brief Initialization) ---
         System.out.println("=== Train Consist Management App ===");
 
         // UC11: Regex Validation
-        String trainId = "TRN-2026";
+        String trainId = "TRN-5566";
         if (Pattern.matches("TRN-\\d{4}", trainId)) {
-            System.out.println("Validated Train: " + trainId);
+            System.out.println("Validated Train ID: " + trainId);
         }
 
-        // --- UC13: Performance Comparison (Loops vs Streams) ---
-        System.out.println("\n--- Performance Benchmarking (Loops vs Streams) ---");
+        List<Bogie> trainConsist = new ArrayList<>();
 
-        // 1. Prepare a larger dataset for meaningful measurement
-        List<Bogie> largeConsist = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
-            largeConsist.add(new Bogie("B"+i, "Sleeper", "Passengers", 72));
-            largeConsist.add(new Bogie("C"+i, "Cylindrical", "Petroleum", 3000));
+        // --- UC14: Handling Invalid Bogie Capacity ---
+        System.out.println("\n--- Attempting Bogie Creation (Exception Handling) ---");
+
+        try {
+            // Case 1: Valid Bogie
+            Bogie b1 = new Bogie("B001", "Sleeper", "Passengers", 72);
+            trainConsist.add(b1);
+            System.out.println("✔ Successfully added: " + b1);
+
+            // Case 2: Invalid Bogie (This will trigger the catch block)
+            System.out.println("Attempting to add bogie with zero capacity...");
+            Bogie b2 = new Bogie("B002", "Sleeper", "Passengers", 0);
+            trainConsist.add(b2);
+
+        } catch (InvalidCapacityException e) {
+            System.err.println("❌ FAILED: " + e.getMessage());
         }
 
-        int threshold = 60;
-
-        // 2. Benchmarking Traditional Loop
-        long loopStart = System.nanoTime();
-        List<Bogie> loopResult = new ArrayList<>();
-        for (Bogie b : largeConsist) {
-            if (b.getCapacity() > threshold) {
-                loopResult.add(b);
-            }
-        }
-        long loopEnd = System.nanoTime();
-        long loopDuration = loopEnd - loopStart;
-
-        // 3. Benchmarking Stream API
-        long streamStart = System.nanoTime();
-        List<Bogie> streamResult = largeConsist.stream()
-                .filter(b -> b.getCapacity() > threshold)
-                .collect(Collectors.toList());
-        long streamEnd = System.nanoTime();
-        long streamDuration = streamEnd - streamStart;
-
-        // 4. Comparison Results
-        System.out.println("Loop Filtering Time   : " + loopDuration + " ns");
-        System.out.println("Stream Filtering Time : " + streamDuration + " ns");
-        System.out.println("Result Count (Loop)   : " + loopResult.size());
-        System.out.println("Result Count (Stream) : " + streamResult.size());
-
-        if (loopDuration < streamDuration) {
-            System.out.println(">> Analysis: Traditional loop was faster in this run.");
-        } else {
-            System.out.println(">> Analysis: Stream API was faster/equivalent in this run.");
+        try {
+            // Case 3: Negative Capacity
+            System.out.println("Attempting to add bogie with negative capacity...");
+            Bogie b3 = new Bogie("B003", "AC Chair", "Passengers", -10);
+            trainConsist.add(b3);
+        } catch (InvalidCapacityException e) {
+            System.err.println("❌ FAILED: " + e.getMessage());
         }
 
-        // --- UC12: Safety Compliance (Final Check) ---
-        boolean isSafe = largeConsist.stream()
+        // --- UC10 & UC12: Analytics & Safety Audit ---
+        System.out.println("\n--- Post-Validation Consist State ---");
+        int totalCapacity = trainConsist.stream().mapToInt(Bogie::getCapacity).sum();
+        System.out.println("Total Valid Seating: " + totalCapacity);
+
+        boolean isSafe = trainConsist.stream()
                 .allMatch(b -> !b.getType().equals("Cylindrical") || b.getCargo().equals("Petroleum"));
-        System.out.println("\nSafety Audit Result: " + (isSafe ? "PASS ✅" : "FAIL ❌"));
+        System.out.println("Safety Audit: " + (isSafe ? "PASS ✅" : "FAIL ❌"));
+
+        System.out.println("\nStatus: UC14 Validation Complete.");
     }
 }
