@@ -3,15 +3,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Bogie Class: Represents both Passenger and Goods units (UC7 - UC12)
+ * Bogie Class: Models a railway unit with attributes (UC7 - UC13)
  */
 class Bogie {
     private String id;
-    private String type; // e.g., "Sleeper", "Cylindrical", "Rectangular"
-    private String cargo; // e.g., "Passengers", "Petroleum", "Coal"
+    private String type;
+    private String cargo;
     private int capacity;
 
-    // Constructor for UC12 logic
     Bogie(String id, String type, String cargo, int capacity) {
         this.id = id;
         this.type = type;
@@ -25,62 +24,67 @@ class Bogie {
 
     @Override
     public String toString() {
-        return String.format("[%s | %s | %s]", type, cargo, capacity);
+        return type + " [" + capacity + "]";
     }
 }
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
-        // --- UC1 - UC5: Consist Management ---
+        // --- UC1 - UC11 Recap (Brief Initialization) ---
         System.out.println("=== Train Consist Management App ===");
 
-        // --- UC11: Regex Validation ---
-        String trainId = "TRN-9876";
+        // UC11: Regex Validation
+        String trainId = "TRN-2026";
         if (Pattern.matches("TRN-\\d{4}", trainId)) {
-            System.out.println("Train ID " + trainId + " validated successfully.");
+            System.out.println("Validated Train: " + trainId);
         }
 
-        // --- UC7 - UC10: Collection & Aggregation Logic ---
-        List<Bogie> trainConsist = new ArrayList<>();
-        trainConsist.add(new Bogie("B001", "Sleeper", "Passengers", 72));
-        trainConsist.add(new Bogie("B002", "AC Chair", "Passengers", 56));
+        // --- UC13: Performance Comparison (Loops vs Streams) ---
+        System.out.println("\n--- Performance Benchmarking (Loops vs Streams) ---");
 
-        // --- UC12: Safety Compliance Check for Goods Bogies ---
-        System.out.println("\n--- Safety Compliance Verification (allMatch) ---");
+        // 1. Prepare a larger dataset for meaningful measurement
+        List<Bogie> largeConsist = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            largeConsist.add(new Bogie("B"+i, "Sleeper", "Passengers", 72));
+            largeConsist.add(new Bogie("C"+i, "Cylindrical", "Petroleum", 3000));
+        }
 
-        // Adding Goods Bogies for UC12 scenario
-        trainConsist.add(new Bogie("G001", "Cylindrical", "Petroleum", 3000));
-        trainConsist.add(new Bogie("G002", "Rectangular", "Coal", 5000));
-        // trainConsist.add(new Bogie("G003", "Cylindrical", "Coal", 3000)); // Uncomment to trigger safety violation
+        int threshold = 60;
 
-        System.out.println("Current Goods Consist: " + trainConsist.stream()
-                .filter(b -> !b.getCargo().equals("Passengers"))
-                .collect(Collectors.toList()));
+        // 2. Benchmarking Traditional Loop
+        long loopStart = System.nanoTime();
+        List<Bogie> loopResult = new ArrayList<>();
+        for (Bogie b : largeConsist) {
+            if (b.getCapacity() > threshold) {
+                loopResult.add(b);
+            }
+        }
+        long loopEnd = System.nanoTime();
+        long loopDuration = loopEnd - loopStart;
 
-        /**
-         * SAFETY RULE:
-         * If type is 'Cylindrical', cargo MUST be 'Petroleum'.
-         * Non-cylindrical bogies can carry anything.
-         */
-        boolean isSafetyCompliant = trainConsist.stream()
-                .allMatch(b -> {
-                    if (b.getType().equalsIgnoreCase("Cylindrical")) {
-                        return b.getCargo().equalsIgnoreCase("Petroleum");
-                    }
-                    return true; // Non-cylindrical bogies pass by default
-                });
+        // 3. Benchmarking Stream API
+        long streamStart = System.nanoTime();
+        List<Bogie> streamResult = largeConsist.stream()
+                .filter(b -> b.getCapacity() > threshold)
+                .collect(Collectors.toList());
+        long streamEnd = System.nanoTime();
+        long streamDuration = streamEnd - streamStart;
 
-        System.out.println("\nExecuting Safety Audit...");
-        if (isSafetyCompliant) {
-            System.out.println("✅ RESULT: Train is SAFETY COMPLIANT. Ready for dispatch.");
+        // 4. Comparison Results
+        System.out.println("Loop Filtering Time   : " + loopDuration + " ns");
+        System.out.println("Stream Filtering Time : " + streamDuration + " ns");
+        System.out.println("Result Count (Loop)   : " + loopResult.size());
+        System.out.println("Result Count (Stream) : " + streamResult.size());
+
+        if (loopDuration < streamDuration) {
+            System.out.println(">> Analysis: Traditional loop was faster in this run.");
         } else {
-            System.out.println("❌ RESULT: SAFETY VIOLATION! Cylindrical bogies detected with unauthorized cargo.");
+            System.out.println(">> Analysis: Stream API was faster/equivalent in this run.");
         }
 
-        // --- UC10 Aggregation (Final Metric) ---
-        int totalCapacity = trainConsist.stream()
-                .map(Bogie::getCapacity)
-                .reduce(0, Integer::sum);
-        System.out.println("Total Train Load/Seat Capacity: " + totalCapacity);
+        // --- UC12: Safety Compliance (Final Check) ---
+        boolean isSafe = largeConsist.stream()
+                .allMatch(b -> !b.getType().equals("Cylindrical") || b.getCargo().equals("Petroleum"));
+        System.out.println("\nSafety Audit Result: " + (isSafe ? "PASS ✅" : "FAIL ❌"));
     }
 }
