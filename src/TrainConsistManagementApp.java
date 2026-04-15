@@ -3,7 +3,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Custom Exceptions from UC14 & UC15
+ * Custom Exceptions (UC14 & UC15)
  */
 class InvalidCapacityException extends Exception {
     public InvalidCapacityException(String message) { super(message); }
@@ -14,7 +14,7 @@ class CargoSafetyException extends RuntimeException {
 }
 
 /**
- * Bogie Class (Integrated UC1-UC18)
+ * Bogie Class (Integrated UC1-UC19)
  */
 class Bogie {
     private String id;
@@ -29,7 +29,6 @@ class Bogie {
     }
 
     public String getId() { return id; }
-    public String getType() { return type; }
     public int getCapacity() { return capacity; }
 
     @Override
@@ -38,57 +37,64 @@ class Bogie {
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
-        System.out.println("=== Train Consist Management App [v18.0 Search Integration] ===");
+        System.out.println("=== Train Consist Management App [v19.0 Optimized Search] ===");
 
-        // --- UC18: Linear Search for Bogie ID ---
-        System.out.println("\n--- Bogie Locator (Linear Search) ---");
+        // --- UC19: Binary Search for Bogie ID ---
+        System.out.println("\n--- Optimized Bogie Locator (Binary Search) ---");
 
+        // Step 1: Data must be sorted for Binary Search
         String[] bogieIds = {"BG101", "BG205", "BG309", "BG412", "BG550"};
-        String searchKey = "BG309";
-        boolean found = false;
-        int position = -1;
+        Arrays.sort(bogieIds); // Ensure natural ordering
 
-        System.out.println("Searching for Bogie ID: " + searchKey + "...");
+        String searchKey = "BG412";
+        System.out.println("Consist IDs (Sorted): " + Arrays.toString(bogieIds));
+        System.out.println("Searching for: " + searchKey);
 
-        // Linear Search Logic: Sequential Traversal
-        for (int i = 0; i < bogieIds.length; i++) {
-            if (bogieIds[i].equals(searchKey)) {
-                found = true;
-                position = i;
-                break; // Early Termination once match is found
+        // Step 2: Binary Search Logic (Divide and Conquer)
+        int low = 0;
+        int high = bogieIds.length - 1;
+        int foundAt = -1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            int comparison = searchKey.compareTo(bogieIds[mid]);
+
+            if (comparison == 0) {
+                foundAt = mid;
+                break; // Match found
+            } else if (comparison > 0) {
+                low = mid + 1; // Search right half
+            } else {
+                high = mid - 1; // Search left half
             }
         }
 
-        if (found) {
-            System.out.println("✔ Bogie " + searchKey + " found at position: " + position);
+        if (foundAt != -1) {
+            System.out.println("✔ Result: Bogie found at index " + foundAt + " using Binary Search.");
         } else {
-            System.out.println("❌ Bogie " + searchKey + " not found in the consist.");
+            System.out.println("❌ Result: Bogie not found.");
         }
 
-        // --- UC17 & UC16: Sorting Recap ---
-        String[] types = {"Sleeper", "AC Chair", "General"};
-        Arrays.sort(types);
-        System.out.println("\nSorted Bogie Types (UC17): " + Arrays.toString(types));
+        // --- UC13: Performance Note ---
+        // Binary Search complexity: O(log n) vs Linear Search: O(n)
 
-        // --- UC1 - UC15 Integration Recap ---
+        // --- UC11: Regex Validation ---
+        if (Pattern.matches("TRN-\\d{4}", "TRN-2026")) {
+            System.out.println("\nTrain authorization verified.");
+        }
+
+        // --- UC10: Stream Aggregation ---
         try {
-            // UC11: Regex Validation
-            if (Pattern.matches("TRN-\\d{4}", "TRN-2026")) {
-                System.out.println("Train ID Format Verified.");
-            }
-
-            // UC10: Stream Aggregation
             List<Bogie> consist = new ArrayList<>();
             consist.add(new Bogie("BG101", "Sleeper", 72));
             consist.add(new Bogie("BG205", "AC Chair", 56));
 
-            int totalLoad = consist.stream().mapToInt(Bogie::getCapacity).sum();
-            System.out.println("Consolidated Capacity: " + totalLoad + " units.");
-
+            int totalSeats = consist.stream().mapToInt(Bogie::getCapacity).sum();
+            System.out.println("Total Seating: " + totalSeats);
         } catch (Exception e) {
-            System.err.println("Operational Alert: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         }
 
-        System.out.println("\nStatus: Linear search complete. All 18 Use Cases active.");
+        System.out.println("\nStatus: UC19 complete. System optimized for high-speed lookup.");
     }
 }
