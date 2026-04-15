@@ -1,38 +1,39 @@
 import java.util.*;
 
-public class TrainConsistApp {
+public class TrainConsistManagementApp {
     public static void main(String[] args) {
-        // --- UC1, UC2, UC3: Summary of previous steps ---
+        // --- UC1 to UC4 Recap ---
         System.out.println("=== Train Consist Management App ===");
 
-        // --- UC4: Maintain Ordered Bogie Sequence (LinkedList) ---
-        System.out.println("\n--- Forming Train Sequence (LinkedList Operations) ---");
+        // --- UC5: Preserve Insertion Order (LinkedHashSet) ---
+        System.out.println("\n--- Forming Train with LinkedHashSet (Unique & Ordered) ---");
 
-        // Initializing LinkedList to model the physical chaining of bogies
-        LinkedList<String> trainSequence = new LinkedList<>();
+        // Initializing LinkedHashSet
+        Set<String> trainFormation = new LinkedHashSet<>();
 
-        // 1. Adding bogies to the ends
-        trainSequence.addFirst("Engine");
-        trainSequence.addLast("Sleeper");
-        trainSequence.addLast("AC Chair");
-        trainSequence.addLast("Cargo");
-        trainSequence.addLast("Guard Coach");
+        // 1. Attaching bogies in a specific sequence
+        trainFormation.add("Engine");
+        trainFormation.add("Sleeper");
+        trainFormation.add("Cargo");
+        trainFormation.add("Guard");
 
-        System.out.println("Initial Sequence: " + trainSequence);
+        System.out.println("Current Formation: " + trainFormation);
 
-        // 2. Inserting in the middle (Positional Insertion)
-        // Inserting 'Pantry Car' at index 2 (between Sleeper and AC Chair)
-        System.out.println("Inserting 'Pantry Car' at position 2...");
-        trainSequence.add(2, "Pantry Car");
-        System.out.println("After Insertion: " + trainSequence);
+        // 2. Attempting to add a duplicate (Business Rule: One physical bogie per train)
+        System.out.println("Attempting to re-attach 'Sleeper'...");
+        boolean isAdded = trainFormation.add("Sleeper");
 
-        // 3. Removing First and Last bogies (Detaching)
-        System.out.println("\nDetaching Engine and Guard Coach for maintenance...");
-        trainSequence.removeFirst();
-        trainSequence.removeLast();
+        if (!isAdded) {
+            System.out.println("System Alert: Duplicate Bogie detected! 'Sleeper' is already in formation.");
+        }
 
-        // 4. Final Ordered State
-        System.out.println("Final Ordered Consist: " + trainSequence);
-        System.out.println("Current length: " + trainSequence.size() + " coaches.");
+        // 3. Displaying final formation
+        // Note: The order will be exactly Engine -> Sleeper -> Cargo -> Guard
+        System.out.println("\nFinal Verified Train Formation (Insertion Order):");
+        for (String bogie : trainFormation) {
+            System.out.println("-> " + bogie);
+        }
+
+        System.out.println("Total unique units attached: " + trainFormation.size());
     }
 }
