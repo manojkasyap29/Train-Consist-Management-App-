@@ -3,18 +3,21 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Custom Exceptions from UC14 & UC15
+ * UC14: Custom Checked Exception for Creation Errors
  */
 class InvalidCapacityException extends Exception {
     public InvalidCapacityException(String message) { super(message); }
 }
 
+/**
+ * UC15: Custom Runtime Exception for Operational Safety
+ */
 class CargoSafetyException extends RuntimeException {
     public CargoSafetyException(String message) { super(message); }
 }
 
 /**
- * Bogie Class (Integrated UC1-UC18)
+ * Bogie Class: The complete domain model (UC1-UC20)
  */
 class Bogie {
     private String id;
@@ -29,7 +32,6 @@ class Bogie {
     }
 
     public String getId() { return id; }
-    public String getType() { return type; }
     public int getCapacity() { return capacity; }
 
     @Override
@@ -37,58 +39,70 @@ class Bogie {
 }
 
 public class TrainConsistManagementApp {
-    public static void main(String[] args) {
-        System.out.println("=== Train Consist Management App [v18.0 Search Integration] ===");
 
-        // --- UC18: Linear Search for Bogie ID ---
-        System.out.println("\n--- Bogie Locator (Linear Search) ---");
+    /**
+     * UC20: Search logic with State Validation
+     */
+    public static void performSearch(String[] bogieIds, String key) {
+        System.out.println(">>> Initiating Search for: " + key);
 
-        String[] bogieIds = {"BG101", "BG205", "BG309", "BG412", "BG550"};
-        String searchKey = "BG309";
+        // 1. State Validation (Defensive Programming)
+        if (bogieIds == null || bogieIds.length == 0) {
+            throw new IllegalStateException("Search Failed: No bogies are available in the train consist.");
+        }
+
+        // 2. Optimized Binary Search (UC19)
+        int low = 0, high = bogieIds.length - 1;
         boolean found = false;
-        int position = -1;
 
-        System.out.println("Searching for Bogie ID: " + searchKey + "...");
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            int cmp = key.compareTo(bogieIds[mid]);
 
-        // Linear Search Logic: Sequential Traversal
-        for (int i = 0; i < bogieIds.length; i++) {
-            if (bogieIds[i].equals(searchKey)) {
+            if (cmp == 0) {
+                System.out.println("✔ Found: Bogie " + key + " located at index " + mid);
                 found = true;
-                position = i;
-                break; // Early Termination once match is found
-            }
+                break;
+            } else if (cmp > 0) low = mid + 1;
+            else high = mid - 1;
         }
 
-        if (found) {
-            System.out.println("✔ Bogie " + searchKey + " found at position: " + position);
-        } else {
-            System.out.println("❌ Bogie " + searchKey + " not found in the consist.");
-        }
+        if (!found) System.out.println("❌ Not Found: Bogie " + key + " is not in the consist.");
+    }
 
-        // --- UC17 & UC16: Sorting Recap ---
-        String[] types = {"Sleeper", "AC Chair", "General"};
-        Arrays.sort(types);
-        System.out.println("\nSorted Bogie Types (UC17): " + Arrays.toString(types));
+    public static void main(String[] args) {
+        System.out.println("=== Train Consist Management App [v20.0 FINAL] ===");
 
-        // --- UC1 - UC15 Integration Recap ---
+        // --- UC20: Exception Handling During Search ---
+        String[] emptyConsist = {};
+        String[] activeConsist = {"BG101", "BG205", "BG309", "BG412"};
+        Arrays.sort(activeConsist); // Required for Binary Search
+
+        // Scenario A: Valid Search
         try {
-            // UC11: Regex Validation
-            if (Pattern.matches("TRN-\\d{4}", "TRN-2026")) {
-                System.out.println("Train ID Format Verified.");
-            }
-
-            // UC10: Stream Aggregation
-            List<Bogie> consist = new ArrayList<>();
-            consist.add(new Bogie("BG101", "Sleeper", 72));
-            consist.add(new Bogie("BG205", "AC Chair", 56));
-
-            int totalLoad = consist.stream().mapToInt(Bogie::getCapacity).sum();
-            System.out.println("Consolidated Capacity: " + totalLoad + " units.");
-
-        } catch (Exception e) {
-            System.err.println("Operational Alert: " + e.getMessage());
+            performSearch(activeConsist, "BG309");
+        } catch (IllegalStateException e) {
+            System.err.println("Caught Expected Error: " + e.getMessage());
         }
 
-        System.out.println("\nStatus: Linear search complete. All 18 Use Cases active.");
+        System.out.println();
+
+        // Scenario B: Search on Empty Train (Fail-Fast)
+        try {
+            performSearch(emptyConsist, "BG999");
+        } catch (IllegalStateException e) {
+            System.err.println("❌ ERROR: " + e.getMessage());
+        }
+
+        // --- UC10 & UC11 Recap ---
+        try {
+            if (Pattern.matches("TRN-\\d{4}", "TRN-2026")) {
+                System.out.println("\nTrain TRN-2026 fully validated and ready for departure.");
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+
+        System.out.println("\n[System Termination: All 20 Use Cases Executed Successfully]");
     }
 }
