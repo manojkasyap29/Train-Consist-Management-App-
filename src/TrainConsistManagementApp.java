@@ -1,38 +1,38 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-public class TrainConsistManagementApp {
+public class TrainConsistApp {
     public static void main(String[] args) {
-        // --- UC1 & UC2: Consist Initialization ---
+        // --- UC1, UC2, UC3: Summary of previous steps ---
         System.out.println("=== Train Consist Management App ===");
-        List<String> trainConsist = new ArrayList<>();
 
-        // --- UC3: Track Unique Bogie IDs (HashSet) ---
-        System.out.println("\n--- Initializing Bogie ID Tracking (Uniqueness Check) ---");
+        // --- UC4: Maintain Ordered Bogie Sequence (LinkedList) ---
+        System.out.println("\n--- Forming Train Sequence (LinkedList Operations) ---");
 
-        // Using Set interface with HashSet implementation
-        Set<String> bogieIds = new HashSet<>();
+        // Initializing LinkedList to model the physical chaining of bogies
+        LinkedList<String> trainSequence = new LinkedList<>();
 
-        // Adding Bogie IDs (including an intentional duplicate)
-        System.out.println("Registering Bogie IDs: B101, B102, B103, B101 (duplicate)...");
-        bogieIds.add("B101");
-        bogieIds.add("B102");
-        bogieIds.add("B103");
+        // 1. Adding bogies to the ends
+        trainSequence.addFirst("Engine");
+        trainSequence.addLast("Sleeper");
+        trainSequence.addLast("AC Chair");
+        trainSequence.addLast("Cargo");
+        trainSequence.addLast("Guard Coach");
 
-        // Attempting to add a duplicate
-        boolean isAdded = bogieIds.add("B101");
+        System.out.println("Initial Sequence: " + trainSequence);
 
-        // 1. Check if the duplicate was accepted
-        if (!isAdded) {
-            System.out.println("Alert: Bogie ID 'B101' is already registered. Duplicate rejected.");
-        }
+        // 2. Inserting in the middle (Positional Insertion)
+        // Inserting 'Pantry Car' at index 2 (between Sleeper and AC Chair)
+        System.out.println("Inserting 'Pantry Car' at position 2...");
+        trainSequence.add(2, "Pantry Car");
+        System.out.println("After Insertion: " + trainSequence);
 
-        // 2. Display Unique IDs
-        System.out.println("Unique Bogie IDs in System: " + bogieIds);
-        System.out.println("Total Unique Bogies: " + bogieIds.size());
+        // 3. Removing First and Last bogies (Detaching)
+        System.out.println("\nDetaching Engine and Guard Coach for maintenance...");
+        trainSequence.removeFirst();
+        trainSequence.removeLast();
 
-        System.out.println("\nStatus: Data integrity verified. No duplicate bogies detected.");
+        // 4. Final Ordered State
+        System.out.println("Final Ordered Consist: " + trainSequence);
+        System.out.println("Current length: " + trainSequence.size() + " coaches.");
     }
 }
