@@ -1,58 +1,68 @@
 import java.util.*;
 
 /**
- * Train Consist Management App
- * UC1 - UC6: Comprehensive Train Management
+ * UC7: Bogie Class to hold properties
  */
-public class TrainConsistApp {
+class Bogie {
+    String name;
+    int capacity;
+
+    Bogie(String name, int capacity) {
+        this.name = name;
+        this.capacity = capacity;
+    }
+
+    @Override
+    public String toString() {
+        return name + " (Capacity: " + capacity + ")";
+    }
+}
+
+public class TrainConsistManagementApp {
     public static void main(String[] args) {
-        // --- UC1: Welcome Message & Initialization ---
+        // --- UC1: Initialization ---
         System.out.println("=== Train Consist Management App ===");
-        List<String> trainConsist = new ArrayList<>();
 
-        // --- UC2: Basic List Operations (Add/Remove) ---
-        trainConsist.add("Sleeper");
-        trainConsist.add("AC Chair");
-        trainConsist.add("First Class");
-        trainConsist.remove("AC Chair");
+        // --- UC2 & UC4: List & LinkedList Operations ---
+        LinkedList<String> trainSequence = new LinkedList<>();
+        trainSequence.add("Engine");
+        trainSequence.add("Sleeper");
+        trainSequence.add("Cargo");
+        trainSequence.add("Guard");
 
-        // --- UC3 & UC5: Unique & Ordered Formation (LinkedHashSet) ---
-        // We use LinkedHashSet to ensure no duplicates while keeping the sequence
-        Set<String> uniqueFormation = new LinkedHashSet<>();
-        uniqueFormation.add("Engine");
-        uniqueFormation.add("Sleeper");
-        uniqueFormation.add("Cargo");
-        uniqueFormation.add("Guard");
+        // --- UC3 & UC5: Uniqueness & Order (LinkedHashSet) ---
+        Set<String> uniqueFormation = new LinkedHashSet<>(trainSequence);
 
-        // --- UC4: Chaining Logic (LinkedList) ---
-        LinkedList<String> chain = new LinkedList<>(uniqueFormation);
+        // --- UC6: Key-Value Mapping (HashMap) ---
+        Map<String, Integer> capacityMap = new HashMap<>();
+        capacityMap.put("Sleeper", 72);
+        capacityMap.put("AC Chair", 56);
+        capacityMap.put("First Class", 24);
 
-        // --- UC6: Map Bogie to Capacity (HashMap) ---
-        System.out.println("\n--- Bogie Capacity Mapping (HashMap) ---");
+        // --- UC7: Custom Sorting with Comparator ---
+        System.out.println("\n--- Sorting Bogies by Capacity (Comparator) ---");
 
-        // Key: Bogie Name (String), Value: Capacity (Integer)
-        Map<String, Integer> bogieCapacityMap = new HashMap<>();
+        // 1. Create a list of Custom Objects
+        List<Bogie> passengerBogies = new ArrayList<>();
+        passengerBogies.add(new Bogie("Sleeper", 72));
+        passengerBogies.add(new Bogie("AC Chair", 56));
+        passengerBogies.add(new Bogie("First Class", 24));
 
-        // 1. Assigning capacities using put()
-        bogieCapacityMap.put("Sleeper", 72);
-        bogieCapacityMap.put("AC Chair", 56);
-        bogieCapacityMap.put("First Class", 24);
-        bogieCapacityMap.put("Cargo", 5000); // 5000kg load
+        System.out.println("Before Sorting: " + passengerBogies);
 
-        // 2. Iterating through the Map using entrySet()
-        // This allows us to see both the Bogie and its associated data
-        System.out.println("Bogie-Capacity Details:");
-        for (Map.Entry<String, Integer> entry : bogieCapacityMap.entrySet()) {
-            String unit = (entry.getKey().equals("Cargo")) ? " kg" : " Seats";
-            System.out.println("Bogie: " + entry.getKey() + " | Capacity: " + entry.getValue() + unit);
+        // 2. Sorting using Comparator (Ascending order)
+        // We use a Lambda expression to define the comparison logic
+        passengerBogies.sort(Comparator.comparingInt(b -> b.capacity));
+
+        // 3. Displaying sorted results
+        System.out.println("After Sorting (Lowest to Highest Capacity):");
+        for (Bogie b : passengerBogies) {
+            System.out.println(">> " + b);
         }
 
-        // 3. Fast Lookup Example
-        String searchBogie = "Sleeper";
-        if (bogieCapacityMap.containsKey(searchBogie)) {
-            System.out.println("\nQuick Search: " + searchBogie + " can hold " + bogieCapacityMap.get(searchBogie) + " passengers.");
-        }
-
-        System.out.println("\nStatus: Mapping complete. System ready for load validation.");
+        // Optional: Sorting in Descending order for identifying high-capacity bogies
+        passengerBogies.sort((b1, b2) -> b2.capacity - b1.capacity);
+        System.out.println("\nRanked by High-Capacity (Descending):");
+        passengerBogies.forEach(b -> System.out.println("Rank: " + b));
     }
 }
