@@ -2,11 +2,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Bogie Class representing a physical unit of the train (Introduced in UC7)
+ * Bogie Class: Models a railway unit with attributes for categorization and sorting.
  */
 class Bogie {
-    String name;
-    int capacity;
+    private String name;
+    private int capacity;
 
     Bogie(String name, int capacity) {
         this.name = name;
@@ -18,72 +18,63 @@ class Bogie {
 
     @Override
     public String toString() {
-        return name + " [Capacity: " + capacity + "]";
+        return "Bogie{name='" + name + "', capacity=" + capacity + "}";
     }
 }
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
-        // --- UC1: Initialize Train and Display Consist Summary ---
+        // --- UC1: Initialize ---
         System.out.println("=== Train Consist Management App ===");
-        List<String> trainConsist = new ArrayList<>();
-        System.out.println("Initial bogie count: " + trainConsist.size());
 
-        // --- UC2: Add/Remove Passenger Bogies (ArrayList Operations) ---
-        trainConsist.add("Sleeper");
-        trainConsist.add("AC Chair");
-        trainConsist.add("First Class");
-        trainConsist.remove("AC Chair");
+        // --- UC2: Basic Operations ---
+        List<String> simpleList = new ArrayList<>();
+        simpleList.add("Sleeper");
+        simpleList.add("AC Chair");
+        simpleList.remove("AC Chair");
 
-        // --- UC3 & UC5: Track Unique IDs & Preserve Insertion Order (LinkedHashSet) ---
-        Set<String> uniqueIds = new LinkedHashSet<>();
-        uniqueIds.add("B101");
-        uniqueIds.add("B102");
-        uniqueIds.add("B101"); // Duplicate - will be ignored
+        // --- UC3 & UC5: Uniqueness & Order ---
+        Set<String> uniqueFormation = new LinkedHashSet<>();
+        uniqueFormation.add("B101");
+        uniqueFormation.add("B102");
+        uniqueIds.add("B101"); // Duplicate ignored
 
-        // --- UC4: Maintain Ordered Bogie IDs (LinkedList) ---
+        // --- UC4: Chaining ---
         LinkedList<String> physicalSequence = new LinkedList<>();
         physicalSequence.addFirst("Engine");
-        physicalSequence.addLast("Sleeper");
-        physicalSequence.add(1, "Pantry Car");
+        physicalSequence.addLast("Guard");
 
-        // --- UC6: Map Bogie to Capacity (HashMap) ---
-        Map<String, Integer> capacityMap = new HashMap<>();
-        capacityMap.put("Sleeper", 72);
-        capacityMap.put("AC Chair", 56);
-        capacityMap.put("First Class", 24);
+        // --- UC6: Capacity Mapping ---
+        Map<String, Integer> staticCapacity = new HashMap<>();
+        staticCapacity.put("Sleeper", 72);
 
-        // --- UC7: Sort Bogies by Capacity (Comparator) ---
+        // --- UC7: Custom Objects & Sorting ---
         List<Bogie> passengerBogies = new ArrayList<>();
         passengerBogies.add(new Bogie("Sleeper", 72));
+        passengerBogies.add(new Bogie("Sleeper", 72)); // Second sleeper unit
         passengerBogies.add(new Bogie("AC Chair", 56));
         passengerBogies.add(new Bogie("First Class", 24));
-        passengerBogies.add(new Bogie("Special Coach", 80));
+        passengerBogies.add(new Bogie("First Class", 24)); // Second first class unit
 
-        passengerBogies.sort(Comparator.comparingInt(Bogie::getCapacity));
+        // --- UC8: Stream Filtering ---
+        List<Bogie> highCap = passengerBogies.stream()
+                .filter(b -> b.getCapacity() > 50)
+                .collect(Collectors.toList());
 
-        // --- UC8: Filter Passenger Bogies Using Streams ---
-        System.out.println("\n--- High-Capacity Bogie Filtering (Stream API) ---");
+        // --- UC9: Group Bogies by Type (Collectors.groupingBy) ---
+        System.out.println("\n--- Categorizing Bogies by Type (groupingBy) ---");
 
-        // Defining the threshold
-        int capacityThreshold = 60;
+        // Using groupingBy to create a Map where key = name, and value = List of bogies
+        Map<String, List<Bogie>> groupedBogies = passengerBogies.stream()
+                .collect(Collectors.groupingBy(Bogie::getName));
 
-        // Using Stream Pipeline: stream() -> filter() -> collect()
-        List<String> highCapacityNames = passengerBogies.stream()
-                .filter(b -> b.getCapacity() > capacityThreshold) // Threshold Filtering Logic
-                .map(Bogie::getName)                              // Transform to names
-                .collect(Collectors.toList());                    // Materialize to new list
+        // Displaying the structured output
+        groupedBogies.forEach((type, list) -> {
+            System.out.println("Category: " + type + " | Units: " + list.size());
+            list.forEach(bogie -> System.out.println("   -> " + bogie));
+        });
 
-        System.out.println("Filtering bogies with capacity > " + capacityThreshold + "...");
-
-        if (highCapacityNames.isEmpty()) {
-            System.out.println("No matching bogies found.");
-        } else {
-            System.out.println("High-Capacity Bogies: " + highCapacityNames);
-        }
-
-        // Demonstrating Original List Integrity
-        System.out.println("\nVerification: Original list size remains " + passengerBogies.size());
-        System.out.println("Status: Functional processing complete.");
+        System.out.println("\nSummary: " + groupedBogies.keySet().size() + " distinct categories identified.");
+        System.out.println("Original list integrity check (size): " + passengerBogies.size());
     }
 }
