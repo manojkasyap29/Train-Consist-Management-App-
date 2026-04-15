@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Bogie Class: Models a railway unit with attributes for categorization and sorting.
+ * Bogie Class: Models a railway unit with attributes (UC7 - UC10)
  */
 class Bogie {
     private String name;
@@ -18,7 +18,7 @@ class Bogie {
 
     @Override
     public String toString() {
-        return "Bogie{name='" + name + "', capacity=" + capacity + "}";
+        return name + " (Seats: " + capacity + ")";
     }
 }
 
@@ -27,54 +27,61 @@ public class TrainConsistManagementApp {
         // --- UC1: Initialize ---
         System.out.println("=== Train Consist Management App ===");
 
-        // --- UC2: Basic Operations ---
+        // --- UC2: Basic List Operations ---
         List<String> simpleList = new ArrayList<>();
         simpleList.add("Sleeper");
-        simpleList.add("AC Chair");
-        simpleList.remove("AC Chair");
+        simpleList.remove("Sleeper");
 
-        // --- UC3 & UC5: Uniqueness & Order ---
-        Set<String> uniqueFormation = new LinkedHashSet<>();
-        uniqueFormation.add("B101");
-        uniqueFormation.add("B102");
-        uniqueIds.add("B101"); // Duplicate ignored
+        // --- UC3 & UC5: Uniqueness & Order (LinkedHashSet) ---
+        Set<String> uniqueIds = new LinkedHashSet<>();
+        uniqueIds.add("B101");
+        uniqueIds.add("B102");
 
-        // --- UC4: Chaining ---
-        LinkedList<String> physicalSequence = new LinkedList<>();
-        physicalSequence.addFirst("Engine");
-        physicalSequence.addLast("Guard");
+        // --- UC4: Chaining (LinkedList) ---
+        LinkedList<String> sequence = new LinkedList<>();
+        sequence.addFirst("Engine");
+        sequence.addLast("Guard");
 
-        // --- UC6: Capacity Mapping ---
-        Map<String, Integer> staticCapacity = new HashMap<>();
-        staticCapacity.put("Sleeper", 72);
+        // --- UC6: Key-Value Mapping (HashMap) ---
+        Map<String, Integer> staticCapMap = new HashMap<>();
+        staticCapMap.put("AC Chair", 56);
 
         // --- UC7: Custom Objects & Sorting ---
         List<Bogie> passengerBogies = new ArrayList<>();
         passengerBogies.add(new Bogie("Sleeper", 72));
-        passengerBogies.add(new Bogie("Sleeper", 72)); // Second sleeper unit
+        passengerBogies.add(new Bogie("Sleeper", 72));
         passengerBogies.add(new Bogie("AC Chair", 56));
         passengerBogies.add(new Bogie("First Class", 24));
-        passengerBogies.add(new Bogie("First Class", 24)); // Second first class unit
+
+        passengerBogies.sort(Comparator.comparingInt(Bogie::getCapacity));
 
         // --- UC8: Stream Filtering ---
-        List<Bogie> highCap = passengerBogies.stream()
+        List<Bogie> filtered = passengerBogies.stream()
                 .filter(b -> b.getCapacity() > 50)
                 .collect(Collectors.toList());
 
-        // --- UC9: Group Bogies by Type (Collectors.groupingBy) ---
-        System.out.println("\n--- Categorizing Bogies by Type (groupingBy) ---");
-
-        // Using groupingBy to create a Map where key = name, and value = List of bogies
-        Map<String, List<Bogie>> groupedBogies = passengerBogies.stream()
+        // --- UC9: Grouping By Type ---
+        Map<String, List<Bogie>> grouped = passengerBogies.stream()
                 .collect(Collectors.groupingBy(Bogie::getName));
 
-        // Displaying the structured output
-        groupedBogies.forEach((type, list) -> {
-            System.out.println("Category: " + type + " | Units: " + list.size());
-            list.forEach(bogie -> System.out.println("   -> " + bogie));
-        });
+        // --- UC10: Count Total Seats in Train (reduce) ---
+        System.out.println("\n--- Calculating Total Train Capacity (Stream Reduction) ---");
 
-        System.out.println("\nSummary: " + groupedBogies.keySet().size() + " distinct categories identified.");
-        System.out.println("Original list integrity check (size): " + passengerBogies.size());
+        // Pipeline: stream() -> map() -> reduce()
+        // reduce(identity, accumulator)
+        int totalSeats = passengerBogies.stream()
+                .map(Bogie::getCapacity)        // Extract numeric capacity (UC10 map)
+                .reduce(0, Integer::sum);       // Sum all values (UC10 reduce)
+
+        System.out.println("Extracting capacities from all bogies...");
+        System.out.println("Applying reduction using Integer::sum...");
+
+        System.out.println("\n========================================");
+        System.out.println("TOTAL SEATING CAPACITY: " + totalSeats + " Seats");
+        System.out.println("========================================");
+
+        // Verification of UC10 requirements
+        System.out.println("Original bogie count verified: " + passengerBogies.size());
+        System.out.println("Status: Analytics aggregate calculated successfully.");
     }
 }
