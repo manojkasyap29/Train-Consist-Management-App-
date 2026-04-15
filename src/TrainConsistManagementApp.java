@@ -1,8 +1,10 @@
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Bogie Class: Models a railway unit with attributes (UC7 - UC10)
+ * Bogie Class: Models a railway unit with attributes (UC7 - UC11)
  */
 class Bogie {
     private String name;
@@ -24,64 +26,60 @@ class Bogie {
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
-        // --- UC1: Initialize ---
+        // --- UC1 - UC10: Previous Operations (Summarized Execution) ---
         System.out.println("=== Train Consist Management App ===");
 
-        // --- UC2: Basic List Operations ---
-        List<String> simpleList = new ArrayList<>();
-        simpleList.add("Sleeper");
-        simpleList.remove("Sleeper");
+        // Setup base data for the train
+        List<Bogie> passengerBogies = new ArrayList<>(Arrays.asList(
+                new Bogie("Sleeper", 72),
+                new Bogie("Sleeper", 72),
+                new Bogie("AC Chair", 56),
+                new Bogie("First Class", 24)
+        ));
 
-        // --- UC3 & UC5: Uniqueness & Order (LinkedHashSet) ---
-        Set<String> uniqueIds = new LinkedHashSet<>();
-        uniqueIds.add("B101");
-        uniqueIds.add("B102");
+        // --- UC11: Validate Train ID & Cargo Codes (Regex) ---
+        System.out.println("\n--- Input Validation Layer (Regex) ---");
 
-        // --- UC4: Chaining (LinkedList) ---
-        LinkedList<String> sequence = new LinkedList<>();
-        sequence.addFirst("Engine");
-        sequence.addLast("Guard");
+        // 1. Define Patterns
+        // TRN-\\d{4} : Matches "TRN-" followed by exactly 4 digits
+        // PET-[A-Z]{2} : Matches "PET-" followed by exactly 2 uppercase letters
+        String trainIdRegex = "TRN-\\d{4}";
+        String cargoCodeRegex = "PET-[A-Z]{2}";
 
-        // --- UC6: Key-Value Mapping (HashMap) ---
-        Map<String, Integer> staticCapMap = new HashMap<>();
-        staticCapMap.put("AC Chair", 56);
+        Pattern trainPattern = Pattern.compile(trainIdRegex);
+        Pattern cargoPattern = Pattern.compile(cargoCodeRegex);
 
-        // --- UC7: Custom Objects & Sorting ---
-        List<Bogie> passengerBogies = new ArrayList<>();
-        passengerBogies.add(new Bogie("Sleeper", 72));
-        passengerBogies.add(new Bogie("Sleeper", 72));
-        passengerBogies.add(new Bogie("AC Chair", 56));
-        passengerBogies.add(new Bogie("First Class", 24));
+        // 2. Sample Inputs for Validation
+        String[] testTrainIds = {"TRN-1234", "TRAIN12", "TRN-123", "TRN-12345"};
+        String[] testCargoCodes = {"PET-AB", "PET-ab", "PET123", "PET-XY"};
 
-        passengerBogies.sort(Comparator.comparingInt(Bogie::getCapacity));
+        System.out.println("Validating Train IDs:");
+        for (String id : testTrainIds) {
+            Matcher matcher = trainPattern.matcher(id);
+            if (matcher.matches()) {
+                System.out.println("✔ Valid Train ID: " + id);
+            } else {
+                System.out.println("❌ Invalid Train ID: " + id + " (Format must be TRN-XXXX)");
+            }
+        }
 
-        // --- UC8: Stream Filtering ---
-        List<Bogie> filtered = passengerBogies.stream()
-                .filter(b -> b.getCapacity() > 50)
-                .collect(Collectors.toList());
+        System.out.println("\nValidating Cargo Codes:");
+        for (String code : testCargoCodes) {
+            Matcher matcher = cargoPattern.matcher(code);
+            if (matcher.matches()) {
+                System.out.println("✔ Valid Cargo Code: " + code);
+            } else {
+                System.out.println("❌ Invalid Cargo Code: " + code + " (Format must be PET-XX)");
+            }
+        }
 
-        // --- UC9: Grouping By Type ---
-        Map<String, List<Bogie>> grouped = passengerBogies.stream()
-                .collect(Collectors.groupingBy(Bogie::getName));
-
-        // --- UC10: Count Total Seats in Train (reduce) ---
-        System.out.println("\n--- Calculating Total Train Capacity (Stream Reduction) ---");
-
-        // Pipeline: stream() -> map() -> reduce()
-        // reduce(identity, accumulator)
+        // --- Final Analytics (from UC10) ---
         int totalSeats = passengerBogies.stream()
-                .map(Bogie::getCapacity)        // Extract numeric capacity (UC10 map)
-                .reduce(0, Integer::sum);       // Sum all values (UC10 reduce)
-
-        System.out.println("Extracting capacities from all bogies...");
-        System.out.println("Applying reduction using Integer::sum...");
+                .map(Bogie::getCapacity)
+                .reduce(0, Integer::sum);
 
         System.out.println("\n========================================");
-        System.out.println("TOTAL SEATING CAPACITY: " + totalSeats + " Seats");
+        System.out.println("VALIDATION COMPLETE | TOTAL SEATS: " + totalSeats);
         System.out.println("========================================");
-
-        // Verification of UC10 requirements
-        System.out.println("Original bogie count verified: " + passengerBogies.size());
-        System.out.println("Status: Analytics aggregate calculated successfully.");
     }
 }
