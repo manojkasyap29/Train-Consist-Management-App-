@@ -14,7 +14,7 @@ class CargoSafetyException extends RuntimeException {
 }
 
 /**
- * Bogie Class (Integrated UC1-UC17)
+ * Bogie Class (Integrated UC1-UC18)
  */
 class Bogie {
     private String id;
@@ -28,6 +28,7 @@ class Bogie {
         this.capacity = capacity;
     }
 
+    public String getId() { return id; }
     public String getType() { return type; }
     public int getCapacity() { return capacity; }
 
@@ -37,50 +38,57 @@ class Bogie {
 
 public class TrainConsistManagementApp {
     public static void main(String[] args) {
-        System.out.println("=== Train Consist Management App [v17.0 Library Sorting] ===");
+        System.out.println("=== Train Consist Management App [v18.0 Search Integration] ===");
 
-        // --- UC17: Built-in Sorting (Arrays.sort) ---
-        System.out.println("\n--- Alphabetical Bogie Sorting (Arrays.sort) ---");
+        // --- UC18: Linear Search for Bogie ID ---
+        System.out.println("\n--- Bogie Locator (Linear Search) ---");
 
-        // 1. Array of bogie type names
-        String[] bogieTypes = {"Sleeper", "AC Chair", "First Class", "General", "Luxury"};
+        String[] bogieIds = {"BG101", "BG205", "BG309", "BG412", "BG550"};
+        String searchKey = "BG309";
+        boolean found = false;
+        int position = -1;
 
-        System.out.println("Original Order  : " + Arrays.toString(bogieTypes));
+        System.out.println("Searching for Bogie ID: " + searchKey + "...");
 
-        // 2. Using Java Standard Library for optimized sorting (O(n log n))
-        Arrays.sort(bogieTypes);
+        // Linear Search Logic: Sequential Traversal
+        for (int i = 0; i < bogieIds.length; i++) {
+            if (bogieIds[i].equals(searchKey)) {
+                found = true;
+                position = i;
+                break; // Early Termination once match is found
+            }
+        }
 
-        System.out.println("Alphabetical Order: " + Arrays.toString(bogieTypes));
+        if (found) {
+            System.out.println("✔ Bogie " + searchKey + " found at position: " + position);
+        } else {
+            System.out.println("❌ Bogie " + searchKey + " not found in the consist.");
+        }
 
-        // --- UC16: Manual Algorithm Recap (Bubble Sort on numbers) ---
-        int[] capacities = {72, 56, 24, 70, 60};
-        // Manual swap logic from UC16 would go here...
-        Arrays.sort(capacities); // Even for numbers, library sort is preferred
-        System.out.println("\nSorted Capacities (Numeric): " + Arrays.toString(capacities));
+        // --- UC17 & UC16: Sorting Recap ---
+        String[] types = {"Sleeper", "AC Chair", "General"};
+        Arrays.sort(types);
+        System.out.println("\nSorted Bogie Types (UC17): " + Arrays.toString(types));
 
-        // --- UC1 - UC15 Logic Snapshot ---
+        // --- UC1 - UC15 Integration Recap ---
         try {
             // UC11: Regex Validation
             if (Pattern.matches("TRN-\\d{4}", "TRN-2026")) {
-                System.out.println("\nTrain ID verified via Regex.");
+                System.out.println("Train ID Format Verified.");
             }
 
-            // UC7 - UC10: Streams and Collections
+            // UC10: Stream Aggregation
             List<Bogie> consist = new ArrayList<>();
-            consist.add(new Bogie("B101", "Sleeper", 72));
-            consist.add(new Bogie("B102", "AC Chair", 56));
+            consist.add(new Bogie("BG101", "Sleeper", 72));
+            consist.add(new Bogie("BG205", "AC Chair", 56));
 
-            // UC10: Aggregation
-            int totalSeats = consist.stream().mapToInt(Bogie::getCapacity).sum();
-            System.out.println("Total Consolidated Seats: " + totalSeats);
-
-            // UC15: Operational Safety
-            System.out.println("Executing Safety Audit... Done.");
+            int totalLoad = consist.stream().mapToInt(Bogie::getCapacity).sum();
+            System.out.println("Consolidated Capacity: " + totalLoad + " units.");
 
         } catch (Exception e) {
-            System.err.println("Runtime Error: " + e.getMessage());
+            System.err.println("Operational Alert: " + e.getMessage());
         }
 
-        System.out.println("\nStatus: All 17 Use Cases successfully integrated.");
+        System.out.println("\nStatus: Linear search complete. All 18 Use Cases active.");
     }
 }
